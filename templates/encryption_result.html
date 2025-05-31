@@ -44,7 +44,6 @@
         
         <div class="button-group">
             <a href="/" class="back-button">Вернуться на главную страницу</a>
-            <a href="#" class="back-button" onclick="goToDecrypt()">Перейти к дешифрованию</a>
         </div>
     </div>
     
@@ -58,17 +57,6 @@
             setTimeout(() => {
                 copyButton.textContent = 'Копировать';
             }, 2000);
-        }
-        
-        function goToDecrypt() {
-            const encryptedText = document.getElementById('encrypted-text').value;
-            window.location.href = '/#decrypt-section';
-            setTimeout(() => {
-                const decryptTextarea = document.getElementById('encrypted_data');
-                if (decryptTextarea) {
-                    decryptTextarea.value = encryptedText;
-                }
-            }, 500);
         }
     </script>
 </body>

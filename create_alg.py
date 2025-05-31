@@ -1,4 +1,10 @@
-import math
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Скрипт для создания файла алгоритмов RSA."""
+
+with open('alg.py', 'w', encoding='utf-8') as f:
+    f.write('''import math
 
 def encrypt(message, public_key):
     """
@@ -61,3 +67,4 @@ def decrypt_text(encrypted, private_key=None):
         
     decrypted = [decrypt(num, private_key) for num in encrypted]
     return numbers_to_text(decrypted)
+''') 
