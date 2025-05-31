@@ -3,16 +3,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from alg import encrypt_text, decrypt_text
-from database import init_db
 import uvicorn
 from typing import List, Optional
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Инициализация базы данных
-init_db()
 
 @app.get("/", response_class=HTMLResponse)
 async def show_form(request: Request):
