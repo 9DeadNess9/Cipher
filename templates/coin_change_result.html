@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат</title>
+    <link rel="stylesheet" href="/static/css/result.css">
+</head>
+<body>
+    <div class="result-container">
+        <div class="page-title">Результат размена</div>
+        <div class="change-section">
+            {% if result is string %}
+                <div class="message">{{ result }}</div>
+            {% else %}
+                {% for coin in result %}
+                    <div class="coin">{{ coin }} руб.</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="button-group">
+            <a href="/" class="back-button">Вернуться на главную страницу</a>
+            <form action="/reset" method="get">
+                <button type="submit" class="back-button">Обновить номинал</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

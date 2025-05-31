@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Банковский размен: реализация алгоритма</title>
+    <link rel="stylesheet" href="/static/css/form.css">
+</head>
+<body>
+    <div class="atm-container">
+        <div class="header">
+            <div class="page-title">Расчёт размена</div>
+        </div>
+        <div class="content">
+            <form action="/withdraw" method="post">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="amount" name="amount" required placeholder="Введите сумму">
+                        <div class="currency-symbol">руб</div>
+                    </div>
+                </div>
+                <div class="submit-button">
+                    <button type="submit">Снять деньги</button>
+                </div>
+            </form>
+        </div>
+        <div class="footer">
+            <div class="section-title">Доступный номинал:</div>
+            <div class="bills-grid">
+                {% for denomination, quantity in banknotes %}
+                <div class="bill-card">
+                    <div class="bill-denomination">{{ denomination }}₽</div>
+                    <div class="bill-count">
+                        {{ quantity }} 
+                        {% if quantity % 100 >= 11 and quantity % 100 <= 14 %}
+                            купюр
+                        {% else %}
+                            {% set last_digit = quantity % 10 %}
+                            {% if last_digit == 1 %}
+                                купюра
+                            {% elif last_digit >= 2 and last_digit <= 4 %}
+                                купюры
+                            {% else %}
+                                купюр
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
