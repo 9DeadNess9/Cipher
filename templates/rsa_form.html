@@ -48,7 +48,6 @@
             <div class="result-box">
                 <h3>Результат шифрования:</h3>
                 <div class="result-content">
-                    <div class="cipher-content">{{ encrypt_result }}</div>
                     <div class="copy-section">
                         <textarea id="encrypted-text" readonly>{{ encrypt_result }}</textarea>
                         <button id="copy-encryption-button" onclick="copyToClipboard('encrypted-text', 'copy-encryption-button')">Копировать</button>
@@ -87,7 +86,6 @@
             <div class="result-box">
                 <h3>Результат дешифрования:</h3>
                 <div class="result-content">
-                    <div class="plaintext-content">{{ decrypt_result }}</div>
                     <div class="copy-section">
                         <textarea id="decrypted-text" readonly>{{ decrypt_result }}</textarea>
                         <button id="copy-decryption-button" onclick="copyToClipboard('decrypted-text', 'copy-decryption-button')">Копировать</button>
