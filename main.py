@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from alg import encrypt_text, decrypt_text
-from database import init_db, get_operation_history, save_encryption_operation, save_decryption_operation, clear_history
+from database import init_db
 import uvicorn
 from typing import List, Optional
 
@@ -16,8 +16,7 @@ init_db()
 
 @app.get("/", response_class=HTMLResponse)
 async def show_form(request: Request):
-    history = get_operation_history()
-    return templates.TemplateResponse("rsa_form.html", {"request": request, "history": history})
+    return templates.TemplateResponse("rsa_form.html", {"request": request})
 
 @app.post("/", response_class=HTMLResponse)
 async def process_form(
@@ -29,8 +28,7 @@ async def process_form(
     e: Optional[str] = Form(None),
     d: Optional[str] = Form(None)
 ):
-    history = get_operation_history()
-    context = {"request": request, "history": history}
+    context = {"request": request}
 
     try:
         # Преобразуем строки в числа
@@ -49,9 +47,6 @@ async def process_form(
             
             # Шифруем сообщение
             encrypted = encrypt_text(message, public_key)
-            
-            # Сохраняем операцию в базе данных
-            save_encryption_operation(message, str(encrypted), n, e)
             
             # Добавляем результат и исходные данные в контекст
             context.update({
@@ -81,9 +76,6 @@ async def process_form(
             # Дешифруем сообщение
             decrypted = decrypt_text(encrypted, private_key)
             
-            # Сохраняем операцию в базе данных
-            save_decryption_operation(encrypted_data, decrypted, n, d)
-            
             # Добавляем результат и исходные данные в контекст
             context.update({
                 "decrypt_result": decrypted,
@@ -95,22 +87,11 @@ async def process_form(
         else:
             raise ValueError("Неизвестное действие")
             
-        # Обновляем историю после добавления новой записи
-        context["history"] = get_operation_history()
-        
         return templates.TemplateResponse("rsa_form.html", context)
-    
+        
     except Exception as e:
         context["error"] = str(e)
         return templates.TemplateResponse("rsa_form.html", context)
 
-@app.post("/clear-history")
-async def clear_history_route():
-    try:
-        clear_history()
-        return RedirectResponse(url="/", status_code=303)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка при очистке истории: {str(e)}")
-
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

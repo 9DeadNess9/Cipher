@@ -321,24 +321,3 @@ input[type="number"]::-webkit-inner-spin-button {
     color: #b71c1c;
     font-size: 18px;
 }
-
-.history-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 15px;
-}
-
-.clear-history-button {
-    background-color: #e53935;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.clear-history-button:hover {
-    background-color: #c62828;
-}

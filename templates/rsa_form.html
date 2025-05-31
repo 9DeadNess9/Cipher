@@ -94,39 +94,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% if history and history|length > 0 %}
-        <div class="section">
-            <h2>История операций</h2>
-            <div class="history-actions">
-                <form action="/clear-history" method="post">
-                    <button type="submit" class="clear-history-button">Очистить историю</button>
-                </form>
-            </div>
-            <table class="keys-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Тип операции</th>
-                        <th>Исходные данные</th>
-                        <th>Результат</th>
-                        <th>Дата</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in history %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.operation_type }}</td>
-                        <td>{{ item.input_data[:30] }}{% if item.input_data|length > 30 %}...{% endif %}</td>
-                        <td>{{ item.output_data[:30] }}{% if item.output_data|length > 30 %}...{% endif %}</td>
-                        <td>{{ item.created_at }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
     </div>
 
     <script>
