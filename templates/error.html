@@ -1,17 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ошибка</title>
-    <link rel="stylesheet" href="/static/css/error.css">
+    <link rel="stylesheet" href="/static/css/result.css">
+    <style>
+        .error-container {
+            background-color: #ffebee;
+            border: 2px solid #f44336;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .error-title {
+            color: #d32f2f;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            color: #b71c1c;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-    <div class="error-container">
-        <div class="error-title">Ошибка обработки данных</div>
-        <div class="error-message">{{ error }}</div>
-        <div class="back-link">
-            <a href="/">Вернуться к форме</a>
+    <div class="result-container">
+        <div class="page-title">Ошибка</div>
+        <div class="error-container">
+            <div class="error-title">Произошла ошибка:</div>
+            <div class="error-message">{{ error }}</div>
+        </div>
+        
+        <div class="button-group">
+            <a href="/" class="back-button">Вернуться на главную страницу</a>
         </div>
     </div>
 </body>

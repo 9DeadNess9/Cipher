@@ -1,77 +1,151 @@
-from database import get_banknotes, update_banknotes
+import random
+import math
+from database import save_key_pair, get_public_key, get_private_key
 
-def greedy_cash_withdrawal(banknotes, amount):
+def is_prime(n, k=5):
     """
-    Жадный алгоритм для выдачи денег с учетом доступного количества купюр.
+    Проверка на простоту числа с использованием теста Миллера-Рабина.
+    n - проверяемое число
+    k - количество итераций теста
     """
-    result = []
-    remaining = amount
-    updated_banknotes = {denomination: quantity for denomination, quantity in banknotes}
+    if n <= 1 or n == 4:
+        return False
+    if n <= 3:
+        return True
+    
+    # Представляем n - 1 в виде d * 2^r
+    d = n - 1
+    r = 0
+    while d % 2 == 0:
+        d //= 2
+        r += 1
+    
+    # Выполняем k тестов
+    for _ in range(k):
+        if not miller_rabin_test(n, d, r):
+            return False
+    return True
 
-    for denomination, quantity in sorted(banknotes, key=lambda x: -x[0]):
-        if remaining == 0:
-            break
-        count = min(remaining // denomination, quantity)
-        if count > 0:
-            result.extend([denomination] * count)
-            remaining -= count * denomination
-            updated_banknotes[denomination] -= count
-
-    if remaining != 0:
-        return "Невозможно выдать запрошенную сумму с текущими купюрами"
-
-    # Обновляем состояние банкомата
-    update_banknotes(updated_banknotes)
-    return sorted(result, reverse=True)
-
-def dp_cash_withdrawal(banknotes, amount):
+def miller_rabin_test(n, d, r):
     """
-    Метод динамического программирования для выдачи денег с учетом доступного количества купюр.
+    Один проход теста Миллера-Рабина для числа n.
     """
-    dp = [float('inf')] * (amount + 1)
-    dp[0] = 0
-    coin_used = [-1] * (amount + 1)
-    updated_banknotes = {denomination: quantity for denomination, quantity in banknotes}
+    # Выбираем случайное число a в диапазоне [2, n-2]
+    a = random.randint(2, n - 2)
+    
+    # Вычисляем x = a^d mod n
+    x = pow(a, d, n)
+    if x == 1 or x == n - 1:
+        return True
+    
+    # Повторяем r - 1 раз
+    for _ in range(r - 1):
+        x = pow(x, 2, n)
+        if x == n - 1:
+            return True
+    
+    return False
 
-    for denomination, quantity in banknotes:
-        for i in range(denomination, amount + 1):
-            if dp[i - denomination] + 1 < dp[i] and updated_banknotes[denomination] > 0:
-                dp[i] = dp[i - denomination] + 1
-                coin_used[i] = denomination
-
-    if dp[amount] == float('inf'):
-        return "Невозможно выдать запрошенную сумму с текущими купюрами"
-
-    result = []
-    remaining = amount
-    while remaining > 0:
-        coin = coin_used[remaining]
-        if coin == -1 or updated_banknotes[coin] <= 0:
-            return "Невозможно выдать запрошенную сумму с текущими купюрами"
-        result.append(coin)
-        remaining -= coin
-        updated_banknotes[coin] -= 1
-
-    # Обновляем состояние банкомата
-    update_banknotes(updated_banknotes)
-    return sorted(result, reverse=True)
-
-def cash_withdrawal(amount):
-    if amount <= 0:
-        raise ValueError("Сумма должна быть положительным числом")
+def generate_prime_number(bit_size=512):
     """
-    Основная функция для выбора метода выдачи денег.
+    Генерирует простое число заданной битовой длины.
     """
-    banknotes = get_banknotes()
+    while True:
+        # Генерируем случайное нечетное число
+        p = random.getrandbits(bit_size) | 1
+        # Проверяем на простоту
+        if is_prime(p):
+            return p
 
-    # Проверяем, можно ли использовать жадный алгоритм
-    can_use_greedy = True
-    for i in range(len(banknotes) - 1):
-        if banknotes[i + 1][0] % banknotes[i][0] != 0:
-            can_use_greedy = False
-            break
+def generate_key_pair(bit_size=512):
+    """
+    Генерирует пару ключей RSA.
+    """
+    # Генерируем два простых числа
+    p = generate_prime_number(bit_size)
+    q = generate_prime_number(bit_size)
+    
+    # Вычисляем модуль
+    n = p * q
+    
+    # Вычисляем функцию Эйлера
+    phi = (p - 1) * (q - 1)
+    
+    # Выбираем открытую экспоненту e
+    e = 65537  # Стандартное значение для e
+    
+    # Убеждаемся, что e и phi взаимно просты
+    assert math.gcd(e, phi) == 1
+    
+    # Вычисляем закрытую экспоненту d
+    d = pow(e, -1, phi)
+    
+    # Сохраняем ключи в базе данных
+    save_key_pair(n, e, d)
+    
+    return {
+        'public_key': {'n': n, 'e': e},
+        'private_key': {'n': n, 'd': d}
+    }
 
-    if can_use_greedy:
-        return greedy_cash_withdrawal(banknotes, amount)
+def encrypt(message, public_key=None):
+    """
+    Шифрует сообщение с помощью открытого ключа RSA.
+    """
+    if public_key is None:
+        n, e = get_public_key()
     else:
-        return dp_cash_withdrawal(banknotes, amount)
+        n, e = public_key['n'], public_key['e']
+    
+    # Преобразуем строку в число
+    if isinstance(message, str):
+        message = int.from_bytes(message.encode(), 'big')
+    
+    # Проверка, что сообщение меньше модуля
+    if message >= n:
+        raise ValueError("Сообщение слишком длинное для данного ключа")
+    
+    # Шифруем сообщение: c = m^e mod n
+    cipher = pow(message, e, n)
+    return cipher
+
+def decrypt(cipher, private_key=None):
+    """
+    Дешифрует сообщение с помощью закрытого ключа RSA.
+    """
+    if private_key is None:
+        n, d = get_private_key()
+    else:
+        n, d = private_key['n'], private_key['d']
+    
+    # Дешифруем сообщение: m = c^d mod n
+    message = pow(cipher, d, n)
+    return message
+
+def text_to_numbers(text):
+    """
+    Преобразует текст в список чисел для шифрования.
+    """
+    # Простой подход: каждый символ отдельно
+    return [ord(char) for char in text]
+
+def numbers_to_text(numbers):
+    """
+    Преобразует список чисел в текст после дешифрования.
+    """
+    return ''.join(chr(num) for num in numbers)
+
+def encrypt_text(text, public_key=None):
+    """
+    Шифрует текстовое сообщение.
+    """
+    numbers = text_to_numbers(text)
+    encrypted = [encrypt(num, public_key) for num in numbers]
+    return encrypted
+
+def decrypt_text(encrypted, private_key=None):
+    """
+    Дешифрует зашифрованное текстовое сообщение.
+    """
+    decrypted = [decrypt(num, private_key) for num in encrypted]
+    return numbers_to_text(decrypted)

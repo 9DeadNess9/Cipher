@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат дешифрования RSA</title>
+    <link rel="stylesheet" href="/static/css/result.css">
+</head>
+<body>
+    <div class="result-container">
+        <div class="page-title">Результат дешифрования RSA</div>
+        <div class="decrypt-section">
+            <h2>Дешифрование выполнено успешно</h2>
+            
+            <div class="message-box">
+                <h3>Зашифрованное сообщение:</h3>
+                <div class="message-content encrypted-list">{{ encrypted }}</div>
+            </div>
+            
+            <div class="plaintext-box">
+                <h3>Расшифрованное сообщение:</h3>
+                <div class="plaintext-content">{{ decrypted }}</div>
+                
+                <div class="copy-section">
+                    <textarea id="decrypted-text" readonly>{{ decrypted }}</textarea>
+                    <button id="copy-button" onclick="copyToClipboard()">Копировать</button>
+                </div>
+            </div>
+            
+            <div class="key-info">
+                <h3>Использованный приватный ключ:</h3>
+                <div class="key-params">
+                    <div class="key-param">
+                        <strong>Модуль (n):</strong>
+                        <div class="key-value">{{ private_key.n }}</div>
+                    </div>
+                    <div class="key-param">
+                        <strong>Закрытая экспонента (d):</strong>
+                        <div class="key-value">{{ private_key.d }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <a href="/" class="back-button">Вернуться на главную страницу</a>
+            <a href="/#encrypt-section" class="back-button">Зашифровать новое сообщение</a>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard() {
+            const textArea = document.getElementById('decrypted-text');
+            textArea.select();
+            document.execCommand('copy');
+            const copyButton = document.getElementById('copy-button');
+            copyButton.textContent = 'Скопировано!';
+            setTimeout(() => {
+                copyButton.textContent = 'Копировать';
+            }, 2000);
+        }
+    </script>
+</body>
+</html> 

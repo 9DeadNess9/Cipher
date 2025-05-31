@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Алгоритм RSA</title>
+    <link rel="stylesheet" href="/static/css/form.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="page-title">Алгоритм RSA - Шифрование/Дешифрование</div>
+        </div>
+        
+        <div class="section">
+            <h2>Генерация ключей</h2>
+            <form action="/generate-keys" method="post">
+                <div class="input-group">
+                    <label for="bit_size">Размер ключа (в битах):</label>
+                    <select id="bit_size" name="bit_size" required>
+                        <option value="512">512 бит (быстро, менее безопасно)</option>
+                        <option value="1024">1024 бит (средняя скорость)</option>
+                        <option value="2048">2048 бит (медленно, наиболее безопасно)</option>
+                    </select>
+                </div>
+                <div class="submit-button">
+                    <button type="submit">Генерировать пару ключей</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>Шифрование сообщения</h2>
+            <form action="/encrypt" method="post">
+                <div class="input-group">
+                    <label for="message">Сообщение для шифрования:</label>
+                    <textarea id="message" name="message" required placeholder="Введите текст для шифрования"></textarea>
+                </div>
+                
+                <div class="key-selection">
+                    <div class="key-option">
+                        <input type="radio" id="use_stored_key_encrypt" name="use_stored_key" value="true" checked>
+                        <label for="use_stored_key_encrypt">Использовать последний сгенерированный ключ</label>
+                    </div>
+                    
+                    <div class="key-option">
+                        <input type="radio" id="use_custom_key_encrypt" name="use_stored_key" value="false">
+                        <label for="use_custom_key_encrypt">Ввести свой ключ:</label>
+                        
+                        <div class="custom-key-fields">
+                            <div class="input-group">
+                                <label for="n_encrypt">Модуль n:</label>
+                                <input type="text" id="n_encrypt" name="n" placeholder="Большое целое число">
+                            </div>
+                            <div class="input-group">
+                                <label for="e_encrypt">Открытая экспонента e:</label>
+                                <input type="text" id="e_encrypt" name="e" placeholder="Например, 65537">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="submit-button">
+                    <button type="submit">Зашифровать</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>Дешифрование сообщения</h2>
+            <form action="/decrypt" method="post">
+                <div class="input-group">
+                    <label for="encrypted_data">Зашифрованные данные (числа через запятую):</label>
+                    <textarea id="encrypted_data" name="encrypted_data" required placeholder="[1234, 5678, 9012, ...]"></textarea>
+                </div>
+                
+                <div class="key-selection">
+                    <div class="key-option">
+                        <input type="radio" id="use_stored_key_decrypt" name="use_stored_key" value="true" checked>
+                        <label for="use_stored_key_decrypt">Использовать последний сгенерированный ключ</label>
+                    </div>
+                    
+                    <div class="key-option">
+                        <input type="radio" id="use_custom_key_decrypt" name="use_stored_key" value="false">
+                        <label for="use_custom_key_decrypt">Ввести свой ключ:</label>
+                        
+                        <div class="custom-key-fields">
+                            <div class="input-group">
+                                <label for="n_decrypt">Модуль n:</label>
+                                <input type="text" id="n_decrypt" name="n" placeholder="Большое целое число">
+                            </div>
+                            <div class="input-group">
+                                <label for="d_decrypt">Закрытая экспонента d:</label>
+                                <input type="text" id="d_decrypt" name="d" placeholder="Закрытый ключ">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="submit-button">
+                    <button type="submit">Дешифровать</button>
+                </div>
+            </form>
+        </div>
+
+        {% if keys and keys|length > 0 %}
+        <div class="section">
+            <h2>Сохраненные ключи</h2>
+            <table class="keys-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Публичный ключ (n, e)</th>
+                        <th>Приватный ключ (n, d)</th>
+                        <th>Дата создания</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in keys %}
+                    <tr>
+                        <td>{{ key.id }}</td>
+                        <td>n: {{ key.public_key.n }}<br>e: {{ key.public_key.e }}</td>
+                        <td>n: {{ key.public_key.n }}<br>d: {{ key.private_key.d }}</td>
+                        <td>{{ key.created_at }}</td>
+                        <td>
+                            <form action="/delete-key/{{ key.id }}" method="post">
+                                <button type="submit" class="delete-button">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Активация/деактивация полей ввода ключа в зависимости от выбора
+        document.addEventListener('DOMContentLoaded', function() {
+            // Для шифрования
+            document.getElementById('use_stored_key_encrypt').addEventListener('change', function() {
+                const fields = document.querySelectorAll('#n_encrypt, #e_encrypt');
+                fields.forEach(field => field.disabled = this.checked);
+            });
+            
+            document.getElementById('use_custom_key_encrypt').addEventListener('change', function() {
+                const fields = document.querySelectorAll('#n_encrypt, #e_encrypt');
+                fields.forEach(field => field.disabled = !this.checked);
+            });
+            
+            // Для дешифрования
+            document.getElementById('use_stored_key_decrypt').addEventListener('change', function() {
+                const fields = document.querySelectorAll('#n_decrypt, #d_decrypt');
+                fields.forEach(field => field.disabled = this.checked);
+            });
+            
+            document.getElementById('use_custom_key_decrypt').addEventListener('change', function() {
+                const fields = document.querySelectorAll('#n_decrypt, #d_decrypt');
+                fields.forEach(field => field.disabled = !this.checked);
+            });
+            
+            // Установка начального состояния
+            const fieldsEncrypt = document.querySelectorAll('#n_encrypt, #e_encrypt');
+            fieldsEncrypt.forEach(field => field.disabled = true);
+            
+            const fieldsDecrypt = document.querySelectorAll('#n_decrypt, #d_decrypt');
+            fieldsDecrypt.forEach(field => field.disabled = true);
+        });
+    </script>
+</body>
+</html> 

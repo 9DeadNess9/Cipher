@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат генерации ключей RSA</title>
+    <link rel="stylesheet" href="/static/css/result.css">
+</head>
+<body>
+    <div class="result-container">
+        <div class="page-title">Результат генерации ключей RSA</div>
+        <div class="key-section">
+            <h2>Пара ключей успешно сгенерирована ({{ bit_size }} бит)</h2>
+            
+            <div class="key-box">
+                <h3>Открытый ключ (для шифрования)</h3>
+                <div class="key-params">
+                    <div class="key-param">
+                        <strong>Модуль (n):</strong>
+                        <div class="key-value">{{ public_key.n }}</div>
+                    </div>
+                    <div class="key-param">
+                        <strong>Открытая экспонента (e):</strong>
+                        <div class="key-value">{{ public_key.e }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="key-box">
+                <h3>Закрытый ключ (для дешифрования)</h3>
+                <div class="key-params">
+                    <div class="key-param">
+                        <strong>Модуль (n):</strong>
+                        <div class="key-value">{{ private_key.n }}</div>
+                    </div>
+                    <div class="key-param">
+                        <strong>Закрытая экспонента (d):</strong>
+                        <div class="key-value">{{ private_key.d }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>Важно!</strong> Закрытый ключ должен храниться в секрете. Никогда не передавайте его третьим лицам.
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <a href="/" class="back-button">Вернуться на главную страницу</a>
+        </div>
+    </div>
+</body>
+</html> 
